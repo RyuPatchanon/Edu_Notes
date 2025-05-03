@@ -129,6 +129,12 @@ app.get('/notes', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
+
+// Test route to confirm backend is working
+app.get('/test', (req, res) => {
+  res.status(200).json({ message: 'API is working!' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
