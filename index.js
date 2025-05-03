@@ -103,7 +103,7 @@ app.get('/notes', (req, res) => {
   
   let query = `
     SELECT notes.note_id, notes.title,
-           ANY_VALUE(courses.name) AS course_name,  // Use ANY_VALUE() for non-aggregated fields
+           ANY_VALUE(courses.name) AS course_name,  // Removed comment syntax
            GROUP_CONCAT(tags.name) AS tags,
            AVG(reviews.rating) AS avg_rating
     FROM notes
@@ -148,6 +148,7 @@ app.get('/notes', (req, res) => {
     res.status(200).json(results);
   });
 });
+
 
 const PORT = process.env.PORT || 3000;
 
