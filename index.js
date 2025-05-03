@@ -6,7 +6,7 @@ const admin = require('firebase-admin');
 const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs'); // add this at the top if not already there
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -21,8 +21,8 @@ admin.initializeApp({
 
 // Initialize Express
 const app = express();
-app.use(cors()); // Enable CORS for frontend requests
-app.use(express.json()); // To parse JSON in requests
+app.use(cors());
+app.use(express.json());
 
 // Set up MySQL connection
 const connection = mysql.createConnection({
@@ -31,11 +31,10 @@ const connection = mysql.createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-    ca: fs.readFileSync('isrgrootx1.pem'), // adjust if the file is elsewhere
+    ca: fs.readFileSync('isrgrootx1.pem'),
   },
 });
 
-// Connect to MySQL
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err.stack);
@@ -44,7 +43,6 @@ connection.connect((err) => {
   console.log('Connected to MySQL as ID ' + connection.threadId);
 });
 
-// Route for getting all departments
 app.get('/departments', (req, res) => {
   connection.query('SELECT * FROM departments', (err, results) => {
     if (err) {
@@ -55,7 +53,6 @@ app.get('/departments', (req, res) => {
   });
 });
 
-// Route for getting all courses in a department
 app.get('/courses', (req, res) => {
   const departmentId = req.query.department_id;
   const query = 'SELECT * FROM courses WHERE department_id = ?';
@@ -68,7 +65,6 @@ app.get('/courses', (req, res) => {
   });
 });
 
-// Route for getting all tags
 app.get('/tags', (req, res) => {
   connection.query('SELECT * FROM tags', (err, results) => {
     if (err) {
@@ -79,18 +75,44 @@ app.get('/tags', (req, res) => {
   });
 });
 
+app.get('/notes/:id/rating', (req, res) => {
+  const noteId = req.params.id;
+  const query = `
+    SELECT AVG(rating) AS average_rating
+    FROM reviews
+    WHERE note_id = ? AND is_deleted = FALSE
+  `;
+
+  connection.query(query, [noteId], (err, results) => {
+    if (err) {
+      console.error('Error getting average rating:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    const average = results[0].average_rating;
+    res.json({
+      note_id: noteId,
+      average_rating: average !== null ? parseFloat(average.toFixed(2)) : null
+    });
+  });
+});
+
 // Route for filtering notes with department, course, and tags
 app.get('/notes', (req, res) => {
   const { department_id, course_id, tag, sort_by } = req.query;
   
   let query = `
-    SELECT notes.id, notes.title, courses.course_name, GROUP_CONCAT(tags.tag_name) AS tags, AVG(reviews.rating) AS avg_rating
+    SELECT notes.note_id, notes.title,
+           ANY_VALUE(courses.name) AS course_name,  // Use ANY_VALUE() for non-aggregated fields
+           GROUP_CONCAT(tags.name) AS tags,
+           AVG(reviews.rating) AS avg_rating
     FROM notes
-    LEFT JOIN courses ON notes.course_id = courses.id
-    LEFT JOIN note_tags ON notes.id = note_tags.note_id
-    LEFT JOIN tags ON note_tags.tag_id = tags.id
-    LEFT JOIN reviews ON notes.id = reviews.note_id
-    WHERE 1 = 1
+    LEFT JOIN courses ON notes.course_id = courses.course_id
+    LEFT JOIN departments ON courses.department_id = departments.department_id
+    LEFT JOIN note_tags ON notes.note_id = note_tags.note_id
+    LEFT JOIN tags ON note_tags.tag_id = tags.tag_id
+    LEFT JOIN reviews ON notes.note_id = reviews.note_id AND reviews.is_deleted = FALSE
+    WHERE notes.is_deleted = FALSE
   `;
   
   const params = [];
@@ -106,14 +128,14 @@ app.get('/notes', (req, res) => {
   }
   
   if (tag) {
-    query += ' AND tags.tag_name = ?';
+    query += ' AND tags.name = ?';
     params.push(tag);
   }
 
-  query += ' GROUP BY notes.id';
+  query += ' GROUP BY notes.note_id';
   
   if (sort_by === 'date') {
-    query += ' ORDER BY notes.uploaded_at DESC';
+    query += ' ORDER BY notes.created_at DESC';  // or uploaded_at, based on your schema
   } else if (sort_by === 'rating') {
     query += ' ORDER BY avg_rating DESC';
   }
@@ -127,10 +149,8 @@ app.get('/notes', (req, res) => {
   });
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 
-// Test route to confirm backend is working
 app.get('/test', (req, res) => {
   res.status(200).json({ message: 'API is working!' });
 });
