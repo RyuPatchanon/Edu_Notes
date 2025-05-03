@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs'); // add this at the top if not already there
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,9 @@ const connection = mysql.createConnection({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  ssl: {
+    ca: fs.readFileSync('isrgrootx1.pem'), // adjust if the file is elsewhere
+  },
 });
 
 // Connect to MySQL
