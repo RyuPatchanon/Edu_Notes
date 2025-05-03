@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');  // Required to read the SSL certificate
 
 // Load environment variables
 dotenv.config();
@@ -23,12 +24,15 @@ const app = express();
 app.use(cors()); // Enable CORS for frontend requests
 app.use(express.json()); // To parse JSON in requests
 
-// Set up MySQL connection
+// Set up MySQL connection with SSL
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  ssl: {
+    ca: fs.readFileSync(path.join(__dirname, 'isrgrootx1.pem')),  // Use the current directory for the certificate
+  },
 });
 
 // Connect to MySQL
