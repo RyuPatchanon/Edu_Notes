@@ -75,44 +75,23 @@ app.get('/tags', (req, res) => {
   });
 });
 
-app.get('/notes/:id/rating', (req, res) => {
-  const noteId = req.params.id;
-  const query = `
-    SELECT AVG(rating) AS average_rating
-    FROM reviews
-    WHERE note_id = ? AND is_deleted = FALSE
-  `;
-
-  connection.query(query, [noteId], (err, results) => {
-    if (err) {
-      console.error('Error getting average rating:', err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-
-    const average = results[0].average_rating;
-    res.json({
-      note_id: noteId,
-      average_rating: average !== null ? parseFloat(average.toFixed(2)) : null
-    });
-  });
-});
-
-// Route for filtering notes with department, course, and tags
 app.get('/notes', (req, res) => {
-  const { department_id, course_id, tag, sort_by } = req.query;
+  const { department_id, course_id, tag_id, sort_by } = req.query;
   
   let query = `
-    SELECT notes.note_id, notes.title,
-           ANY_VALUE(courses.name) AS course_name,  // Removed comment syntax
-           GROUP_CONCAT(tags.name) AS tags,
-           AVG(reviews.rating) AS avg_rating
-    FROM notes
-    LEFT JOIN courses ON notes.course_id = courses.course_id
-    LEFT JOIN departments ON courses.department_id = departments.department_id
-    LEFT JOIN note_tags ON notes.note_id = note_tags.note_id
-    LEFT JOIN tags ON note_tags.tag_id = tags.tag_id
-    LEFT JOIN reviews ON notes.note_id = reviews.note_id AND reviews.is_deleted = FALSE
-    WHERE notes.is_deleted = FALSE
+  SELECT 
+      notes.note_id, 
+      notes.title, 
+      ANY_VALUE(courses.name) AS course_name, 
+      GROUP_CONCAT(DISTINCT tags.name) AS tags,
+      AVG(reviews.rating) AS avg_rating
+  FROM notes
+  LEFT JOIN courses ON notes.course_id = courses.course_id
+  LEFT JOIN departments ON courses.department_id = departments.department_id
+  LEFT JOIN note_tags ON notes.note_id = note_tags.note_id
+  LEFT JOIN tags ON note_tags.tag_id = tags.tag_id
+  LEFT JOIN reviews ON notes.note_id = reviews.note_id AND reviews.is_deleted = FALSE
+  WHERE notes.is_deleted = FALSE
   `;
   
   const params = [];
@@ -127,13 +106,13 @@ app.get('/notes', (req, res) => {
     params.push(course_id);
   }
   
-  if (tag) {
-    query += ' AND tags.name = ?';
-    params.push(tag);
+  if (tag_id) {
+    query += ' AND tags.tag_id = ?';
+    params.push(tag_id);
   }
 
-  query += ' GROUP BY notes.note_id';
-  
+  query += ' GROUP BY notes.note_id'; // No need to add this twice
+
   if (sort_by === 'date') {
     query += ' ORDER BY notes.created_at DESC';  // or uploaded_at, based on your schema
   } else if (sort_by === 'rating') {
@@ -148,7 +127,6 @@ app.get('/notes', (req, res) => {
     res.status(200).json(results);
   });
 });
-
 
 const PORT = process.env.PORT || 3000;
 
