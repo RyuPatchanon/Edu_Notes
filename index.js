@@ -1,7 +1,7 @@
 // Import necessary modules
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const admin = require('firebase-admin');
 const dotenv = require('dotenv');
 const multer = require('multer');
@@ -24,8 +24,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Set up MySQL connection
-const connection = mysql.createConnection({
+// Create a MySQL connection pool using mysql2/promise
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -33,14 +33,6 @@ const connection = mysql.createConnection({
   ssl: {
     ca: fs.readFileSync('isrgrootx1.pem'),
   },
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err.stack);
-    return;
-  }
-  console.log('Connected to MySQL as ID ' + connection.threadId);
 });
 
 // Multer setup to handle file uploads
@@ -70,21 +62,17 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     // Generate the Firebase file URL
     const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${admin.storage().bucket().name}/o/notes%2F${fileName}?alt=media`;
 
-    // Insert note information into the database
-    const query = `
-      INSERT INTO notes (title, description, course_id, tag_id, file_url) 
-      VALUES (?, ?, ?, ?, ?)
-    `;
-    connection.query(query, [title, description, course_id, tag_id, fileUrl], (err, results) => {
-      if (err) {
-        return res.status(500).json({ message: "Failed to insert into database." });
-      }
+    // Insert note information into the database using the promise pool
+    const [result] = await pool.execute(
+      `INSERT INTO notes (title, description, course_id, tag_id, file_url) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [title, description, course_id, tag_id, fileUrl]
+    );
 
-      // Clean up the temporary file
-      fs.unlinkSync(filePath);
+    // Clean up the temporary file
+    fs.unlinkSync(filePath);
 
-      res.status(200).json({ message: "File uploaded and note saved.", noteId: results.insertId });
-    });
+    res.status(200).json({ message: "File uploaded and note saved.", noteId: result.insertId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to upload file to Firebase." });
@@ -92,44 +80,43 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 // Get departments
-app.get('/departments', (req, res) => {
-  connection.query('SELECT * FROM departments', (err, results) => {
-    if (err) {
-      console.error('Error fetching departments:', err);
-      return res.status(500).send('Error fetching departments');
-    }
+app.get('/departments', async (req, res) => {
+  try {
+    const [results] = await pool.execute('SELECT * FROM departments');
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching departments:', err);
+    res.status(500).send('Error fetching departments');
+  }
 });
 
 // Get courses based on department
-app.get('/courses', (req, res) => {
+app.get('/courses', async (req, res) => {
   const departmentId = req.query.department_id;
-  const query = 'SELECT * FROM courses WHERE department_id = ?';
-  connection.query(query, [departmentId], (err, results) => {
-    if (err) {
-      console.error('Error fetching courses:', err);
-      return res.status(500).send('Error fetching courses');
-    }
+  try {
+    const [results] = await pool.execute('SELECT * FROM courses WHERE department_id = ?', [departmentId]);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching courses:', err);
+    res.status(500).send('Error fetching courses');
+  }
 });
 
 // Get tags
-app.get('/tags', (req, res) => {
-  connection.query('SELECT * FROM tags', (err, results) => {
-    if (err) {
-      console.error('Error fetching tags:', err);
-      return res.status(500).send('Error fetching tags');
-    }
+app.get('/tags', async (req, res) => {
+  try {
+    const [results] = await pool.execute('SELECT * FROM tags');
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching tags:', err);
+    res.status(500).send('Error fetching tags');
+  }
 });
 
 // Get notes with optional filters
-app.get('/notes', (req, res) => {
+app.get('/notes', async (req, res) => {
   const { department_id, course_id, tag_id, sort_by } = req.query;
-  
+
   let query = `
   SELECT 
       notes.note_id, 
@@ -171,17 +158,17 @@ app.get('/notes', (req, res) => {
     query += ' ORDER BY avg_rating DESC';
   }
   
-  connection.query(query, params, (err, results) => {
-    if (err) {
-      console.error('Error fetching notes:', err);
-      return res.status(500).send('Error fetching notes');
-    }
+  try {
+    const [results] = await pool.execute(query, params);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching notes:', err);
+    res.status(500).send('Error fetching notes');
+  }
 });
 
 // Get details of a specific note
-app.get('/notes/:id', (req, res) => {
+app.get('/notes/:id', async (req, res) => {
   const noteId = req.params.id;
 
   const query = `
@@ -204,17 +191,17 @@ app.get('/notes/:id', (req, res) => {
     GROUP BY notes.note_id
   `;
 
-  connection.query(query, [noteId], (err, results) => {
-    if (err) {
-      console.error('Error fetching note details:', err);
-      return res.status(500).send('Error fetching note');
-    }
+  try {
+    const [results] = await pool.execute(query, [noteId]);
     res.status(200).json(results[0]);
-  });
+  } catch (err) {
+    console.error('Error fetching note details:', err);
+    res.status(500).send('Error fetching note');
+  }
 });
 
 // Get reviews for a note
-app.get('/notes/:id/reviews', (req, res) => {
+app.get('/notes/:id/reviews', async (req, res) => {
   const noteId = req.params.id;
 
   const query = `
@@ -224,17 +211,17 @@ app.get('/notes/:id/reviews', (req, res) => {
     ORDER BY created_at DESC
   `;
 
-  connection.query(query, [noteId], (err, results) => {
-    if (err) {
-      console.error('Error fetching reviews:', err);
-      return res.status(500).send('Error fetching reviews');
-    }
+  try {
+    const [results] = await pool.execute(query, [noteId]);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+    res.status(500).send('Error fetching reviews');
+  }
 });
 
 // Post a review for a note
-app.post('/notes/:id/reviews', (req, res) => {
+app.post('/notes/:id/reviews', async (req, res) => {
   const noteId = req.params.id;
   const { content, rating } = req.body;
 
@@ -247,16 +234,17 @@ app.post('/notes/:id/reviews', (req, res) => {
     VALUES (?, ?, ?, NOW(), FALSE)
   `;
 
-  connection.query(query, [noteId, content, rating], (err, result) => {
-    if (err) {
-      console.error('Error submitting review:', err);
-      return res.status(500).send('Error submitting review');
-    }
+  try {
+    await pool.execute(query, [noteId, content, rating]);
     res.status(201).send('Review submitted');
-  });
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    res.status(500).send('Error submitting review');
+  }
 });
 
-app.get('/stats', (req, res) => {
+// Stats endpoint
+app.get('/stats', async (req, res) => {
   const stats = {
     total_notes: 0,
     total_files: 0,
@@ -286,30 +274,28 @@ app.get('/stats', (req, res) => {
     `
   };
 
-  connection.query(queries.totalNotes, (err, noteResult) => {
-    if (err) return res.status(500).send('Error fetching total notes');
+  try {
+    const [noteResult] = await pool.execute(queries.totalNotes);
     stats.total_notes = noteResult[0].count;
 
-    connection.query(queries.totalFiles, (err, fileResult) => {
-      if (err) return res.status(500).send('Error fetching total files');
-      stats.total_files = fileResult[0].count;
+    const [fileResult] = await pool.execute(queries.totalFiles);
+    stats.total_files = fileResult[0].count;
 
-      connection.query(queries.filesByCourse, (err, courseResults) => {
-        if (err) return res.status(500).send('Error fetching files by course');
-        stats.files_per_course = courseResults;
+    const [courseResults] = await pool.execute(queries.filesByCourse);
+    stats.files_per_course = courseResults;
 
-        connection.query(queries.filesByDepartment, (err, deptResults) => {
-          if (err) return res.status(500).send('Error fetching files by department');
-          stats.files_per_department = deptResults;
+    const [deptResults] = await pool.execute(queries.filesByDepartment);
+    stats.files_per_department = deptResults;
 
-          res.status(200).json(stats);
-        });
-      });
-    });
-  });
+    res.status(200).json(stats);
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+    res.status(500).send('Error fetching stats');
+  }
 });
 
-app.get('/deleted-notes', (req, res) => {
+// Deleted notes endpoint
+app.get('/deleted-notes', async (req, res) => {
   const query = `
     SELECT notes.note_id, notes.title, trash.deleted_at
     FROM notes
@@ -318,13 +304,17 @@ app.get('/deleted-notes', (req, res) => {
     ORDER BY trash.deleted_at DESC
   `;
 
-  connection.query(query, (err, results) => {
-    if (err) return res.status(500).send('Error fetching deleted notes');
+  try {
+    const [results] = await pool.execute(query);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching deleted notes:', err);
+    res.status(500).send('Error fetching deleted notes');
+  }
 });
 
-app.get('/deleted-reviews', (req, res) => {
+// Deleted reviews endpoint
+app.get('/deleted-reviews', async (req, res) => {
   const query = `
     SELECT reviews.review_id, reviews.content, reviews.rating, review_trash.deleted_at
     FROM reviews
@@ -333,40 +323,47 @@ app.get('/deleted-reviews', (req, res) => {
     ORDER BY review_trash.deleted_at DESC
   `;
 
-  connection.query(query, (err, results) => {
-    if (err) return res.status(500).send('Error fetching deleted reviews');
+  try {
+    const [results] = await pool.execute(query);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error('Error fetching deleted reviews:', err);
+    res.status(500).send('Error fetching deleted reviews');
+  }
 });
 
-app.post('/restore-note/:id', (req, res) => {
+// Restore note endpoint
+app.post('/restore-note/:id', async (req, res) => {
   const noteId = req.params.id;
 
   const updateNote = 'UPDATE notes SET is_deleted = FALSE WHERE note_id = ?';
   const deleteTrash = 'DELETE FROM trash WHERE note_id = ?';
 
-  connection.query(updateNote, [noteId], (err) => {
-    if (err) return res.status(500).send('Error restoring note');
-    connection.query(deleteTrash, [noteId], (err) => {
-      if (err) return res.status(500).send('Error cleaning trash');
-      res.status(200).send('Note restored');
-    });
-  });
+  try {
+    await pool.execute(updateNote, [noteId]);
+    await pool.execute(deleteTrash, [noteId]);
+    res.status(200).send('Note restored');
+  } catch (err) {
+    console.error('Error restoring note:', err);
+    res.status(500).send('Error restoring note');
+  }
 });
 
-app.post('/restore-review/:id', (req, res) => {
+// Restore review endpoint
+app.post('/restore-review/:id', async (req, res) => {
   const reviewId = req.params.id;
 
   const updateReview = 'UPDATE reviews SET is_deleted = FALSE WHERE review_id = ?';
   const deleteTrash = 'DELETE FROM review_trash WHERE review_id = ?';
 
-  connection.query(updateReview, [reviewId], (err) => {
-    if (err) return res.status(500).send('Error restoring review');
-    connection.query(deleteTrash, [reviewId], (err) => {
-      if (err) return res.status(500).send('Error cleaning review trash');
-      res.status(200).send('Review restored');
-    });
-  });
+  try {
+    await pool.execute(updateReview, [reviewId]);
+    await pool.execute(deleteTrash, [reviewId]);
+    res.status(200).send('Review restored');
+  } catch (err) {
+    console.error('Error restoring review:', err);
+    res.status(500).send('Error restoring review');
+  }
 });
 
 // Test endpoint
