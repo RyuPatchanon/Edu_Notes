@@ -43,6 +43,55 @@ connection.connect((err) => {
   console.log('Connected to MySQL as ID ' + connection.threadId);
 });
 
+// Multer setup to handle file uploads
+const upload = multer({ dest: 'uploads/' });
+
+// Handle file upload route
+app.post('/upload', upload.single('file'), async (req, res) => {
+  const { title, description, course_id, tag_id } = req.body;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ message: "No file uploaded." });
+  }
+
+  try {
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const filePath = path.join(__dirname, 'uploads', file.filename);
+
+    // Upload file to Firebase Storage
+    await admin.storage().bucket().upload(filePath, {
+      destination: `notes/${fileName}`,
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    // Generate the Firebase file URL
+    const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${admin.storage().bucket().name}/o/notes%2F${fileName}?alt=media`;
+
+    // Insert note information into the database
+    const query = `
+      INSERT INTO notes (title, description, course_id, tag_id, file_url) 
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    connection.query(query, [title, description, course_id, tag_id, fileUrl], (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to insert into database." });
+      }
+
+      // Clean up the temporary file
+      fs.unlinkSync(filePath);
+
+      res.status(200).json({ message: "File uploaded and note saved.", noteId: results.insertId });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to upload file to Firebase." });
+  }
+});
+
+// Get departments
 app.get('/departments', (req, res) => {
   connection.query('SELECT * FROM departments', (err, results) => {
     if (err) {
@@ -53,6 +102,7 @@ app.get('/departments', (req, res) => {
   });
 });
 
+// Get courses based on department
 app.get('/courses', (req, res) => {
   const departmentId = req.query.department_id;
   const query = 'SELECT * FROM courses WHERE department_id = ?';
@@ -65,6 +115,7 @@ app.get('/courses', (req, res) => {
   });
 });
 
+// Get tags
 app.get('/tags', (req, res) => {
   connection.query('SELECT * FROM tags', (err, results) => {
     if (err) {
@@ -75,6 +126,7 @@ app.get('/tags', (req, res) => {
   });
 });
 
+// Get notes with optional filters
 app.get('/notes', (req, res) => {
   const { department_id, course_id, tag_id, sort_by } = req.query;
   
@@ -111,10 +163,10 @@ app.get('/notes', (req, res) => {
     params.push(tag_id);
   }
 
-  query += ' GROUP BY notes.note_id'; // No need to add this twice
+  query += ' GROUP BY notes.note_id';
 
   if (sort_by === 'date') {
-    query += ' ORDER BY notes.created_at DESC';  // or uploaded_at, based on your schema
+    query += ' ORDER BY notes.created_at DESC';
   } else if (sort_by === 'rating') {
     query += ' ORDER BY avg_rating DESC';
   }
@@ -128,6 +180,7 @@ app.get('/notes', (req, res) => {
   });
 });
 
+// Get details of a specific note
 app.get('/notes/:id', (req, res) => {
   const noteId = req.params.id;
 
@@ -160,6 +213,7 @@ app.get('/notes/:id', (req, res) => {
   });
 });
 
+// Get reviews for a note
 app.get('/notes/:id/reviews', (req, res) => {
   const noteId = req.params.id;
 
@@ -179,6 +233,7 @@ app.get('/notes/:id/reviews', (req, res) => {
   });
 });
 
+// Post a review for a note
 app.post('/notes/:id/reviews', (req, res) => {
   const noteId = req.params.id;
   const { content, rating } = req.body;
@@ -201,11 +256,13 @@ app.post('/notes/:id/reviews', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-
+// Test endpoint
 app.get('/test', (req, res) => {
   res.status(200).json({ message: 'API is working!' });
 });
+
+// Start the server
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
