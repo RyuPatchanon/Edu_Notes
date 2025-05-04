@@ -1,75 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduNotes - Home</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    header {
-      margin-bottom: 20px;
-    }
-    select {
-      margin: 5px;
-      padding: 6px;
-    }
-    .note-card {
-      background: white;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .note-title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .note-tags {
-      font-size: 0.9em;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Sharing Platform</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <header>
+        <h1>Notes Sharing Platform</h1>
+    </header>
 
-  <header>
-    <h1>EduNotes</h1>
-    <div>
-      <label>Department:</label>
-      <select id="department-select">
-        <option value="">All</option>
-        <!-- Options filled via JS -->
-      </select>
+    <section id="filters">
+        <select id="department-dropdown">
+            <option value="">Select Department</option>
+        </select>
+        <select id="course-dropdown">
+            <option value="">Select Course</option>
+        </select>
+        <select id="tag-dropdown">
+            <option value="">Select Tag</option>
+        </select>
+        <select id="sort-dropdown">
+            <option value="date">Sort by Date</option>
+            <option value="rating">Sort by Rating</option>
+        </select>
+    </section>
 
-      <label>Course:</label>
-      <select id="course-select">
-        <option value="">All</option>
-        <!-- Filtered based on department -->
-      </select>
+    <section id="notes-container">
+        <!-- Notes will be dynamically displayed here -->
+    </section>
 
-      <label>Tag:</label>
-      <select id="tag-select">
-        <option value="">All</option>
-        <!-- Options filled via JS -->
-      </select>
-
-      <label>Sort by:</label>
-      <select id="sort-select">
-        <option value="date">Date</option>
-        <option value="rating">Rating</option>
-      </select>
-    </div>
-  </header>
-
-  <main id="notes-container">
-    <!-- Notes will be rendered here -->
-  </main>
-
-  <script src="scripts/main.js"></script>
+    <script src="scripts/app.js"></script>
 </body>
 </html>
+

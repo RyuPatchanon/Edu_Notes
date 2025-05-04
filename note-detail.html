@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Details</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Note Details</h1>
+    </header>
+
+    <section id="note-detail">
+        <h2 id="note-title"></h2>
+        <p><strong>Course:</strong> <span id="course-name"></span></p>
+        <p><strong>Tags:</strong> <span id="tags"></span></p>
+        <p><strong>Avg. Rating:</strong> <span id="avg-rating"></span></p>
+        <p id="description"></p>
+        <p><a id="download-link" href="#">Download File</a></p>
+
+        <section id="reviews">
+            <h3>Reviews</h3>
+            <div id="reviews-container"></div>
+            
+            <form id="review-form">
+                <textarea id="review-content" placeholder="Leave a review" required></textarea>
+                <input type="number" id="review-rating" min="1" max="5" placeholder="Rating (1-5)" required>
+                <button type="submit">Submit Review</button>
+            </form>
+        </section>
+    </section>
+
+    <script src="scripts/note-detail.js"></script>
+</body>
+</html>
