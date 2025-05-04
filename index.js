@@ -128,6 +128,82 @@ app.get('/notes', (req, res) => {
   });
 });
 
+app.get('/notes/:id', (req, res) => {
+  const noteId = req.params.id;
+
+  const query = `
+    SELECT 
+      notes.note_id, 
+      notes.title,
+      notes.description,
+      notes.created_at,
+      ANY_VALUE(courses.name) AS course_name, 
+      GROUP_CONCAT(DISTINCT tags.name) AS tags,
+      GROUP_CONCAT(DISTINCT files.file_url) AS file_urls,
+      AVG(reviews.rating) AS avg_rating
+    FROM notes
+    LEFT JOIN courses ON notes.course_id = courses.course_id
+    LEFT JOIN note_tags ON notes.note_id = note_tags.note_id
+    LEFT JOIN tags ON note_tags.tag_id = tags.tag_id
+    LEFT JOIN files ON notes.note_id = files.note_id
+    LEFT JOIN reviews ON notes.note_id = reviews.note_id AND reviews.is_deleted = FALSE
+    WHERE notes.note_id = ? AND notes.is_deleted = FALSE
+    GROUP BY notes.note_id
+  `;
+
+  connection.query(query, [noteId], (err, results) => {
+    if (err) {
+      console.error('Error fetching note details:', err);
+      return res.status(500).send('Error fetching note');
+    }
+    res.status(200).json(results[0]);
+  });
+});
+
+app.post('/notes/:id/reviews', (req, res) => {
+  const noteId = req.params.id;
+  const { content, rating } = req.body;
+
+  if (!content || typeof rating !== 'number') {
+    return res.status(400).send('Invalid review data');
+  }
+
+  const query = `
+    INSERT INTO reviews (note_id, content, rating, created_at, is_deleted)
+    VALUES (?, ?, ?, NOW(), FALSE)
+  `;
+
+  connection.query(query, [noteId, content, rating], (err, result) => {
+    if (err) {
+      console.error('Error submitting review:', err);
+      return res.status(500).send('Error submitting review');
+    }
+    res.status(201).send('Review submitted');
+  });
+});
+
+app.post('/notes/:id/reviews', (req, res) => {
+  const noteId = req.params.id;
+  const { content, rating } = req.body;
+
+  if (!content || typeof rating !== 'number') {
+    return res.status(400).send('Invalid review data');
+  }
+
+  const query = `
+    INSERT INTO reviews (note_id, content, rating, created_at, is_deleted)
+    VALUES (?, ?, ?, NOW(), FALSE)
+  `;
+
+  connection.query(query, [noteId, content, rating], (err, result) => {
+    if (err) {
+      console.error('Error submitting review:', err);
+      return res.status(500).send('Error submitting review');
+    }
+    res.status(201).send('Review submitted');
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.get('/test', (req, res) => {
