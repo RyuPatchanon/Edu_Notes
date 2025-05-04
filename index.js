@@ -256,6 +256,119 @@ app.post('/notes/:id/reviews', (req, res) => {
   });
 });
 
+app.get('/stats', (req, res) => {
+  const stats = {
+    total_notes: 0,
+    total_files: 0,
+    files_per_course: [],
+    files_per_department: [],
+  };
+
+  const queries = {
+    totalNotes: 'SELECT COUNT(*) AS count FROM notes WHERE is_deleted = FALSE',
+    totalFiles: 'SELECT COUNT(*) AS count FROM files',
+    filesByCourse: `
+      SELECT courses.name AS course_name, COUNT(files.file_id) AS file_count
+      FROM files
+      JOIN notes ON files.note_id = notes.note_id
+      JOIN courses ON notes.course_id = courses.course_id
+      WHERE notes.is_deleted = FALSE
+      GROUP BY courses.course_id
+    `,
+    filesByDepartment: `
+      SELECT departments.name AS department_name, COUNT(files.file_id) AS file_count
+      FROM files
+      JOIN notes ON files.note_id = notes.note_id
+      JOIN courses ON notes.course_id = courses.course_id
+      JOIN departments ON courses.department_id = departments.department_id
+      WHERE notes.is_deleted = FALSE
+      GROUP BY departments.department_id
+    `
+  };
+
+  connection.query(queries.totalNotes, (err, noteResult) => {
+    if (err) return res.status(500).send('Error fetching total notes');
+    stats.total_notes = noteResult[0].count;
+
+    connection.query(queries.totalFiles, (err, fileResult) => {
+      if (err) return res.status(500).send('Error fetching total files');
+      stats.total_files = fileResult[0].count;
+
+      connection.query(queries.filesByCourse, (err, courseResults) => {
+        if (err) return res.status(500).send('Error fetching files by course');
+        stats.files_per_course = courseResults;
+
+        connection.query(queries.filesByDepartment, (err, deptResults) => {
+          if (err) return res.status(500).send('Error fetching files by department');
+          stats.files_per_department = deptResults;
+
+          res.status(200).json(stats);
+        });
+      });
+    });
+  });
+});
+
+app.get('/deleted-notes', (req, res) => {
+  const query = `
+    SELECT notes.note_id, notes.title, trash.deleted_at
+    FROM notes
+    JOIN trash ON notes.note_id = trash.note_id
+    WHERE notes.is_deleted = TRUE
+    ORDER BY trash.deleted_at DESC
+  `;
+
+  connection.query(query, (err, results) => {
+    if (err) return res.status(500).send('Error fetching deleted notes');
+    res.status(200).json(results);
+  });
+});
+
+app.get('/deleted-reviews', (req, res) => {
+  const query = `
+    SELECT reviews.review_id, reviews.content, reviews.rating, review_trash.deleted_at
+    FROM reviews
+    JOIN review_trash ON reviews.review_id = review_trash.review_id
+    WHERE reviews.is_deleted = TRUE
+    ORDER BY review_trash.deleted_at DESC
+  `;
+
+  connection.query(query, (err, results) => {
+    if (err) return res.status(500).send('Error fetching deleted reviews');
+    res.status(200).json(results);
+  });
+});
+
+app.post('/restore-note/:id', (req, res) => {
+  const noteId = req.params.id;
+
+  const updateNote = 'UPDATE notes SET is_deleted = FALSE WHERE note_id = ?';
+  const deleteTrash = 'DELETE FROM trash WHERE note_id = ?';
+
+  connection.query(updateNote, [noteId], (err) => {
+    if (err) return res.status(500).send('Error restoring note');
+    connection.query(deleteTrash, [noteId], (err) => {
+      if (err) return res.status(500).send('Error cleaning trash');
+      res.status(200).send('Note restored');
+    });
+  });
+});
+
+app.post('/restore-review/:id', (req, res) => {
+  const reviewId = req.params.id;
+
+  const updateReview = 'UPDATE reviews SET is_deleted = FALSE WHERE review_id = ?';
+  const deleteTrash = 'DELETE FROM review_trash WHERE review_id = ?';
+
+  connection.query(updateReview, [reviewId], (err) => {
+    if (err) return res.status(500).send('Error restoring review');
+    connection.query(deleteTrash, [reviewId], (err) => {
+      if (err) return res.status(500).send('Error cleaning review trash');
+      res.status(200).send('Review restored');
+    });
+  });
+});
+
 // Test endpoint
 app.get('/test', (req, res) => {
   res.status(200).json({ message: 'API is working!' });
