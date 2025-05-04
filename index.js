@@ -47,11 +47,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const filePath = path.join(__dirname, 'uploads', file.filename);
-
   try {
     // Upload to Firebase
-    const fileUrl = await uploadFileToFirebase(filePath, file.originalname);
+    const fileUrl = await uploadFileToFirebase(file);
 
     // Insert note
     const [noteResult] = await pool.execute(
