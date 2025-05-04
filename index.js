@@ -7,6 +7,7 @@ const dotenv = require('dotenv');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const uploadFileToFirebase = require("./scripts/firebaseUpload");
 
 // Load environment variables
 dotenv.config();
@@ -23,6 +24,13 @@ admin.initializeApp({
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Firebase Storage setup
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "your-bucket-name.appspot.com", // replace with your actual bucket
+});
+const uploadFileToFirebase = require("./scripts/firebaseUpload");
 
 // Create a MySQL connection pool using mysql2/promise
 const pool = mysql.createPool({
