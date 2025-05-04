@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const courseDropdown = document.getElementById('course_id');
     const tagDropdown = document.getElementById('tag_id');
-    const form = document.getElementById('upload-form');
+    const form = document.getElementById('upload-note-form');
   
     if (!form || !courseDropdown || !tagDropdown) {
       console.error('Required DOM elements not found');
