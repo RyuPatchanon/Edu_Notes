@@ -83,7 +83,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
     res.status(201).json({ message: 'Note uploaded successfully' });
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Upload error:', error.message);
+    console.error(error.stack); // add this for full stack trace
     res.status(500).json({ error: 'Internal server error' });
   }
 });
