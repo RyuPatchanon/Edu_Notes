@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Developer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div id="navbar"></div>
-
   <script>
     fetch('navbar.html')
       .then(res => res.text())
@@ -20,24 +19,22 @@
   <div class="container">
     <h1>Developer Dashboard</h1>
 
-    <section id="stats-section">
+    <section>
       <h2>Statistics</h2>
       <div id="stats"></div>
     </section>
 
-    <section id="deleted-notes-section">
+    <section>
       <h2>Deleted Notes</h2>
-      <div id="deleted-notes"></div>
+      <div id="deleted-notes" class="note-list"></div>
     </section>
 
-    <section id="deleted-reviews-section">
+    <section>
       <h2>Deleted Reviews</h2>
-      <div id="deleted-reviews"></div>
+      <div id="deleted-reviews" class="note-list"></div>
     </section>
   </div>
 
-  <script src="scripts/config.js"></script>
-  <script src="scripts/developer.js"></script>
-
+  <script src="developer.js"></script>
 </body>
 </html>
