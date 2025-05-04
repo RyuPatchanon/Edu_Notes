@@ -50,16 +50,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const filePath = path.join(__dirname, 'uploads', file.filename);
+    const filePath = path.resolve(file.path);
 
     // Upload to Firebase
     const fileUrl = await uploadFileToFirebase(filePath, file.originalname);
 
     // Insert into notes table
     const [result] = await pool.execute(
-      `INSERT INTO notes (title, description, course_id, tag_id, file_url) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [title, description, course_id, tag_id, fileUrl]
+      `INSERT INTO notes (title, description, course_id, file_url) 
+       VALUES (?, ?, ?, ?)`,
+      [title, description, course_id, fileUrl]
     );
 
     const noteId = result.insertId;
@@ -86,7 +86,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     res.status(201).json({ message: 'Note uploaded successfully' });
   } catch (error) {
     console.error('Upload error:', error.message);
-    console.error(error.stack); // add this for full stack trace
+    console.error(error.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
