@@ -7,11 +7,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="upload.html">Upload</a>
-    <a href="developer.html">Developer</a>
-  </nav>
+  <div id="navbar"></div>
+
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+      });
+  </script>
 
   <div class="container">
     <h1>Developer Dashboard</h1>
