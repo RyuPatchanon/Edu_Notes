@@ -15,6 +15,7 @@ dotenv.config();
 // Initialize Firebase Admin SDK with the service account credentials
 const serviceAccount = require('./firebase/serviceAccountKey.json');
 
+// Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_BUCKET,
@@ -24,13 +25,6 @@ admin.initializeApp({
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Firebase Storage setup
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "your-bucket-name.appspot.com", // replace with your actual bucket
-});
-const uploadFileToFirebase = require("./scripts/firebaseUpload");
 
 // Create a MySQL connection pool using mysql2/promise
 const pool = mysql.createPool({
