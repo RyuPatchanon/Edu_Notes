@@ -40,42 +40,51 @@ const upload = multer({ dest: 'uploads/' });
 
 // Handle file upload route
 app.post('/upload', upload.single('file'), async (req, res) => {
-  const { title, description, course_id, tag_id } = req.body;
-  const file = req.file;
-
-  if (!file) {
-    return res.status(400).json({ message: "No file uploaded." });
-  }
-
   try {
-    const fileName = `${Date.now()}-${file.originalname}`;
+    const { title, description, course_id, tag_id } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
     const filePath = path.join(__dirname, 'uploads', file.filename);
 
-    // Upload file to Firebase Storage
-    await admin.storage().bucket().upload(filePath, {
-      destination: `notes/${fileName}`,
-      metadata: {
-        contentType: file.mimetype,
-      },
-    });
+    // Upload to Firebase
+    const fileUrl = await uploadFileToFirebase(filePath, file.originalname);
 
-    // Generate the Firebase file URL
-    const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${admin.storage().bucket().name}/o/notes%2F${fileName}?alt=media`;
-
-    // Insert note information into the database using the promise pool
+    // Insert into notes table
     const [result] = await pool.execute(
       `INSERT INTO notes (title, description, course_id, tag_id, file_url) 
        VALUES (?, ?, ?, ?, ?)`,
       [title, description, course_id, tag_id, fileUrl]
     );
 
-    // Clean up the temporary file
+    const noteId = result.insertId;
+
+    // Insert into files table
+    await pool.execute(
+      `INSERT INTO files (note_id, file_name, file_url, uploaded_at)
+       VALUES (?, ?, ?, NOW())`,
+      [noteId, file.originalname, fileUrl]
+    );
+
+    // Insert into note_tags table
+    if (tag_id) {
+      await pool.execute(
+        `INSERT INTO note_tags (note_id, tag_id)
+         VALUES (?, ?)`,
+        [noteId, tag_id]
+      );
+    }
+
+    // Remove the local file
     fs.unlinkSync(filePath);
 
-    res.status(200).json({ message: "File uploaded and note saved.", noteId: result.insertId });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to upload file to Firebase." });
+    res.status(201).json({ message: 'Note uploaded successfully' });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
