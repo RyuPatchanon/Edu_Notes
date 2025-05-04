@@ -18,31 +18,31 @@
 
   <div class="container">
     <h1>Upload a Note</h1>
-    <form id="upload-note-form" class="form">
+    <form id="upload-note-form" class="form" enctype="multipart/form-data">
       <label for="title">Title</label>
-      <input type="text" id="title" required />
+      <input type="text" id="title" name="title" required />
 
       <label for="description">Description</label>
-      <textarea id="description" rows="4" required></textarea>
+      <textarea id="description" name="description" rows="4" required></textarea>
       
       <label for="department_id">Department</label>
-      <select id="department_id" required>
+      <select id="department_id" name="department_id" required>
         <option value="">Select Department</option>
       </select>
       
       <label for="course_id">Course</label>
-      <select id="course_id" required>
+      <select id="course_id" name="course_id" required>
         <option value="">Select Course</option>
       </select>
 
       <label for="tag_id">Tag</label>
-      <select id="tag_id" required>
+      <select id="tag_id" name="tag_id" required>
         <option value="">Select Tag</option>
       </select>
 
       <label for="file">File</label>
-      <input type="file" id="file" accept=".pdf,.docx,.pptx" required />
-
+      <input type="file" id="file" name="file" accept=".pdf,.docx,.pptx" required />
+      
       <button type="submit">Upload</button>
     </form>
   </div>
