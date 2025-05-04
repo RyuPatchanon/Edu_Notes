@@ -22,7 +22,7 @@ const loadNoteDetails = async () => {
 };
 
 const loadReviews = async (noteId) => {
-    const res = await fetch(`${API_BASE_URL}/reviews/${noteId}`);
+    const res = await fetch(`${API_BASE_URL}/notes/${noteId}/reviews`);
     const reviews = await res.json();
     const container = document.getElementById('reviews-container');
     container.innerHTML = '';
@@ -51,7 +51,7 @@ document.getElementById('review-form').addEventListener('submit', async (e) => {
         return;
     }
 
-    await fetch(`${API_BASE_URL}/reviews/${noteId}`, {
+    await fetch(`${API_BASE_URL}/notes/${noteId}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, rating })
