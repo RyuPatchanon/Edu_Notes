@@ -160,25 +160,22 @@ app.get('/notes/:id', (req, res) => {
   });
 });
 
-app.post('/notes/:id/reviews', (req, res) => {
+app.get('/notes/:id/reviews', (req, res) => {
   const noteId = req.params.id;
-  const { content, rating } = req.body;
-
-  if (!content || typeof rating !== 'number') {
-    return res.status(400).send('Invalid review data');
-  }
 
   const query = `
-    INSERT INTO reviews (note_id, content, rating, created_at, is_deleted)
-    VALUES (?, ?, ?, NOW(), FALSE)
+    SELECT review_id, content, rating, created_at
+    FROM reviews
+    WHERE note_id = ? AND is_deleted = FALSE
+    ORDER BY created_at DESC
   `;
 
-  connection.query(query, [noteId, content, rating], (err, result) => {
+  connection.query(query, [noteId], (err, results) => {
     if (err) {
-      console.error('Error submitting review:', err);
-      return res.status(500).send('Error submitting review');
+      console.error('Error fetching reviews:', err);
+      return res.status(500).send('Error fetching reviews');
     }
-    res.status(201).send('Review submitted');
+    res.status(200).json(results);
   });
 });
 
