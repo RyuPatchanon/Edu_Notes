@@ -1,6 +1,5 @@
-// Fetch departments, courses, tags, and notes
 const fetchDepartments = async () => {
-    const response = await fetch('http://localhost:3000/departments');
+    const response = await fetch(`${API_BASE_URL}/departments`);
     const departments = await response.json();
     const departmentDropdown = document.getElementById('department-dropdown');
     departments.forEach(department => {
@@ -12,7 +11,7 @@ const fetchDepartments = async () => {
 };
 
 const fetchCourses = async (departmentId) => {
-    const response = await fetch(`http://localhost:3000/courses?department_id=${departmentId}`);
+    const response = await fetch(`${API_BASE_URL}/courses?department_id=${departmentId}`);
     const courses = await response.json();
     const courseDropdown = document.getElementById('course-dropdown');
     courseDropdown.innerHTML = '<option value="">Select Course</option>';
@@ -25,7 +24,7 @@ const fetchCourses = async (departmentId) => {
 };
 
 const fetchTags = async () => {
-    const response = await fetch('http://localhost:3000/tags');
+    const response = await fetch(`${API_BASE_URL}/tags`);
     const tags = await response.json();
     const tagDropdown = document.getElementById('tag-dropdown');
     tags.forEach(tag => {
@@ -48,7 +47,7 @@ const fetchNotes = async () => {
     if (tagId) query.append('tag_id', tagId);
     if (sortBy) query.append('sort_by', sortBy);
 
-    const response = await fetch(`http://localhost:3000/notes?${query.toString()}`);
+    const response = await fetch(`${API_BASE_URL}/notes?${query.toString()}`);
     const notes = await response.json();
     const notesContainer = document.getElementById('notes-container');
     notesContainer.innerHTML = '';

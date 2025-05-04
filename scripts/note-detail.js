@@ -7,7 +7,7 @@ const loadNoteDetails = async () => {
     const noteId = getNoteIdFromUrl();
     if (!noteId) return;
 
-    const res = await fetch(`http://localhost:3000/notes/${noteId}`);
+    const res = await fetch(`${API_BASE_URL}/notes/${noteId}`);
     const note = await res.json();
 
     document.getElementById('note-title').textContent = note.title;
@@ -22,7 +22,7 @@ const loadNoteDetails = async () => {
 };
 
 const loadReviews = async (noteId) => {
-    const res = await fetch(`http://localhost:3000/reviews/${noteId}`);
+    const res = await fetch(`${API_BASE_URL}/reviews/${noteId}`);
     const reviews = await res.json();
     const container = document.getElementById('reviews-container');
     container.innerHTML = '';
@@ -51,7 +51,7 @@ document.getElementById('review-form').addEventListener('submit', async (e) => {
         return;
     }
 
-    await fetch(`http://localhost:3000/reviews/${noteId}`, {
+    await fetch(`${API_BASE_URL}/reviews/${noteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, rating })
