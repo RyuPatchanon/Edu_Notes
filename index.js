@@ -12,10 +12,8 @@ const uploadFileToFirebase = require("./scripts/firebaseUpload");
 // Load environment variables
 dotenv.config();
 
-// Initialize Firebase Admin SDK with the service account credentials
-const serviceAccount = require('./firebase/serviceAccountKey.json');
-
 // Initialize Firebase Admin SDK
+const serviceAccount = require('./firebase/serviceAccountKey.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_BUCKET,
@@ -26,7 +24,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Create a MySQL connection pool using mysql2/promise
+// MySQL connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -37,57 +35,60 @@ const pool = mysql.createPool({
   },
 });
 
-// Multer setup to handle file uploads
+// Multer setup
 const upload = multer({ dest: 'uploads/' });
 
-// Handle file upload route
+// File upload endpoint
 app.post('/upload', upload.single('file'), async (req, res) => {
+  const file = req.file;
+  const { title, description, course_id, tag_id } = req.body;
+
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const filePath = path.join(__dirname, 'uploads', file.filename);
+
   try {
-    const { title, description, course_id, tag_id } = req.body;
-    const file = req.file;
-
-    if (!file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    const filePath = path.resolve(file.path);
-
     // Upload to Firebase
     const fileUrl = await uploadFileToFirebase(filePath, file.originalname);
 
-    // Insert into notes table
-    const [result] = await pool.execute(
-      `INSERT INTO notes (title, description, course_id, file_url) 
-       VALUES (?, ?, ?, ?)`,
-      [title, description, course_id, fileUrl]
+    // Insert note
+    const [noteResult] = await pool.execute(
+      `INSERT INTO notes (title, description, course_id, created_at, updated_at, is_deleted) 
+       VALUES (?, ?, ?, NOW(), NOW(), FALSE)`,
+      [title, description, course_id]
     );
 
-    const noteId = result.insertId;
+    const noteId = noteResult.insertId;
 
-    // Insert into files table
+    // Insert file
     await pool.execute(
-      `INSERT INTO files (note_id, file_name, file_url, uploaded_at)
+      `INSERT INTO files (note_id, file_name, file_url, uploaded_at) 
        VALUES (?, ?, ?, NOW())`,
       [noteId, file.originalname, fileUrl]
     );
 
-    // Insert into note_tags table
+    // Insert note_tag if tag_id is provided
     if (tag_id) {
       await pool.execute(
-        `INSERT INTO note_tags (note_id, tag_id)
-         VALUES (?, ?)`,
+        `INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)`,
         [noteId, tag_id]
       );
     }
 
-    // Remove the local file
-    fs.unlinkSync(filePath);
-
     res.status(201).json({ message: 'Note uploaded successfully' });
-  } catch (error) {
-    console.error('Upload error:', error.message);
-    console.error(error.stack);
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    console.error(err.stack);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    // Clean up the uploaded file
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (cleanupErr) {
+      console.warn('Error cleaning up uploaded file:', cleanupErr.message);
+    }
   }
 });
 
@@ -385,7 +386,6 @@ app.get('/test', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
