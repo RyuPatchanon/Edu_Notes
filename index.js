@@ -190,7 +190,7 @@ app.get('/notes/:id', async (req, res) => {
       notes.created_at,
       ANY_VALUE(courses.name) AS course_name, 
       GROUP_CONCAT(DISTINCT tags.name) AS tags,
-      GROUP_CONCAT(DISTINCT files.file_url) AS file_urls,
+      ANY_VALUE(files.file_url) AS file_url,
       AVG(reviews.rating) AS avg_rating
     FROM notes
     LEFT JOIN courses ON notes.course_id = courses.course_id
