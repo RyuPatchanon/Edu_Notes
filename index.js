@@ -283,6 +283,34 @@ app.post('/notes/:id/reviews', async (req, res) => {
   }
 });
 
+// Update note title and description
+app.put('/notes/:id/description', async (req, res) => {
+  const { description } = req.body;
+  const noteId = req.params.id;
+
+  try {
+    await pool.execute('UPDATE notes SET description = ? WHERE note_id = ?', [description, noteId]);
+    res.status(200).send('Description updated');
+  } catch (err) {
+    console.error('Error updating description:', err);
+    res.status(500).send('Error updating description');
+  }
+});
+
+// Update review content and rating
+app.put('/reviews/:id', async (req, res) => {
+  const { content, rating } = req.body;
+  const reviewId = req.params.id;
+
+  try {
+    await pool.execute('UPDATE reviews SET content = ?, rating = ? WHERE review_id = ?', [content, rating, reviewId]);
+    res.status(200).send('Review updated');
+  } catch (err) {
+    console.error('Error updating review:', err);
+    res.status(500).send('Error updating review');
+  }
+});
+
 // Stats endpoint
 app.get('/stats', async (req, res) => {
   const stats = {

@@ -30,14 +30,64 @@ const loadReviews = async (noteId) => {
     reviews.forEach(review => {
         const div = document.createElement('div');
         div.classList.add('review');
+    
         div.innerHTML = `
-            <p>${review.content}</p>
-            <p><strong>Rating:</strong> ${review.rating}</p>
-            <button class="delete-review-btn" data-id="${review.review_id}">Delete Review</button>
+            <p class="review-content">${review.content}</p>
+            <textarea class="edit-review-content" style="display:none;">${review.content}</textarea>
+            <p><strong>Rating:</strong> <span class="review-rating">${review.rating}</span></p>
+            <input type="number" class="edit-review-rating" min="1" max="5" value="${review.rating}" style="display:none;" />
+            <button class="edit-review-btn">Edit</button>
+            <button class="save-review-btn" style="display:none;">Save</button>
             <hr>
         `;
+    
         container.appendChild(div);
-    });
+    
+        const editBtn = div.querySelector('.edit-review-btn');
+        const saveBtn = div.querySelector('.save-review-btn');
+        const contentP = div.querySelector('.review-content');
+        const ratingSpan = div.querySelector('.review-rating');
+        const editContent = div.querySelector('.edit-review-content');
+        const editRating = div.querySelector('.edit-review-rating');
+    
+        editBtn.addEventListener('click', () => {
+            contentP.style.display = 'none';
+            ratingSpan.style.display = 'none';
+            editContent.style.display = 'block';
+            editRating.style.display = 'inline';
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline';
+        });
+    
+        saveBtn.addEventListener('click', async () => {
+            const updatedContent = editContent.value;
+            const updatedRating = parseInt(editRating.value);
+    
+            try {
+                const res = await fetch(`${API_BASE_URL}/reviews/${review.review_id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: updatedContent, rating: updatedRating })
+                });
+    
+                if (res.ok) {
+                    contentP.textContent = updatedContent;
+                    ratingSpan.textContent = updatedRating;
+                    contentP.style.display = 'block';
+                    ratingSpan.style.display = 'inline';
+                    editContent.style.display = 'none';
+                    editRating.style.display = 'none';
+                    editBtn.style.display = 'inline';
+                    saveBtn.style.display = 'none';
+                } else {
+                    alert('Failed to update review.');
+                }
+            } catch (err) {
+                console.error('Error updating review:', err);
+                alert('An error occurred.');
+            }
+        });
+    });    
 
     // Add click event listeners to delete buttons
     document.querySelectorAll('.delete-review-btn').forEach(button => {
@@ -106,5 +156,40 @@ document.getElementById('delete-btn').addEventListener('click', async () => {
     } catch (err) {
         console.error('Error deleting note:', err);
         alert('An error occurred while deleting the note.');
+    }
+});
+
+document.getElementById('edit-description-btn').addEventListener('click', () => {
+    const descriptionText = document.getElementById('description').textContent;
+    document.getElementById('description-edit').value = descriptionText;
+    document.getElementById('description').style.display = 'none';
+    document.getElementById('description-edit').style.display = 'block';
+    document.getElementById('edit-description-btn').style.display = 'none';
+    document.getElementById('save-description-btn').style.display = 'inline';
+});
+
+document.getElementById('save-description-btn').addEventListener('click', async () => {
+    const noteId = getNoteIdFromUrl();
+    const newDescription = document.getElementById('description-edit').value;
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/notes/${noteId}/description`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: newDescription })
+        });
+
+        if (res.ok) {
+            document.getElementById('description').textContent = newDescription;
+            document.getElementById('description').style.display = 'block';
+            document.getElementById('description-edit').style.display = 'none';
+            document.getElementById('edit-description-btn').style.display = 'inline';
+            document.getElementById('save-description-btn').style.display = 'none';
+        } else {
+            alert('Failed to update description.');
+        }
+    } catch (err) {
+        console.error('Error updating description:', err);
+        alert('An error occurred.');
     }
 });
