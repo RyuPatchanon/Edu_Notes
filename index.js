@@ -113,6 +113,20 @@ app.get('/courses', async (req, res) => {
   }
 });
 
+// Add a new course
+app.post('/courses', async (req, res) => {
+  const { course_id, name, department_id } = req.body;
+
+  const query = 'INSERT INTO courses (course_id, name, department_id) VALUES (?, ?, ?)';
+  try {
+    await pool.execute(query, [course_id, name, department_id]);
+    res.status(201).send('Course added');
+  } catch (err) {
+    console.error('Error adding course:', err);
+    res.status(500).send('Error adding course');
+  }
+});
+
 // Get tags
 app.get('/tags', async (req, res) => {
   try {
@@ -123,6 +137,21 @@ app.get('/tags', async (req, res) => {
     res.status(500).send('Error fetching tags');
   }
 });
+
+app.post('/tags', async (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).send('Tag name is required');
+
+  try {
+    const insertQuery = 'INSERT INTO tags (name) VALUES (?)';
+    await pool.execute(insertQuery, [name]);
+    res.status(201).send('Tag added successfully');
+  } catch (err) {
+    console.error('Error inserting tag:', err);
+    res.status(500).send('Failed to add tag');
+  }
+});
+
 
 // Get notes with optional filters
 app.get('/notes', async (req, res) => {
@@ -324,14 +353,19 @@ app.get('/deleted-notes', async (req, res) => {
   }
 });
 
-// Deleted reviews endpoint
+// Deleted reviews endpoint with associated note titles
 app.get('/deleted-reviews', async (req, res) => {
   const query = `
-    SELECT reviews.review_id, reviews.content, reviews.rating, review_trash.deleted_at
-    FROM reviews
-    JOIN review_trash ON reviews.review_id = review_trash.review_id
-    WHERE reviews.is_deleted = TRUE
-    ORDER BY review_trash.deleted_at DESC
+    SELECT 
+      r.review_id,
+      r.content,
+      r.rating,
+      rt.deleted_at,
+      n.title AS note_title
+    FROM review_trash rt
+    JOIN reviews r ON rt.review_id = r.review_id
+    JOIN notes n ON r.note_id = n.note_id
+    ORDER BY rt.deleted_at DESC
   `;
 
   try {

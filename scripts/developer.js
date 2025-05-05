@@ -56,9 +56,10 @@ function loadDeletedReviews() {
 
       container.innerHTML = reviews.map(review => `
         <div class="note-card">
+          <p><strong>Note:</strong> ${review.note_title}</p>
           <p><strong>Rating:</strong> ${review.rating}</p>
           <p>${review.content}</p>
-          <p>Deleted at: ${new Date(review.deleted_at).toLocaleString()}</p>
+          <p><em>Deleted at:</em> ${new Date(review.deleted_at).toLocaleString()}</p>
           <button onclick="restoreReview(${review.review_id})">Restore</button>
         </div>
       `).join('');
@@ -84,3 +85,77 @@ function restoreReview(reviewId) {
       }
     });
 }
+
+function loadDepartmentsForCourseForm() {
+  fetch(`${API_BASE_URL}/departments`)
+    .then(res => res.json())
+    .then(departments => {
+      const select = document.getElementById('department-select');
+      departments.forEach(dep => {
+        const option = document.createElement('option');
+        option.value = dep.department_id;
+        option.textContent = dep.name;
+        select.appendChild(option);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading departments:', err);
+    });
+}
+
+document.getElementById('course-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const course_id = document.getElementById('course-id').value.trim();
+  const name = document.getElementById('new-course').value.trim();
+  const department_id = document.getElementById('department-select').value;
+
+  if (!course_id || !name || !department_id) {
+    alert('Please fill out all fields.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/courses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ course_id, name, department_id })
+    });
+
+    if (res.ok) {
+      alert('Course added successfully');
+      document.getElementById('course-form').reset();
+    } else {
+      alert('Failed to add course (maybe ID already exists?)');
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    alert('Error adding course');
+  }
+});
+
+
+document.getElementById('tag-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('new-tag').value.trim();
+  if (!name) return;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+
+    if (res.ok) {
+      alert('Tag added successfully');
+      document.getElementById('tag-form').reset();
+    } else {
+      alert('Failed to add tag');
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    alert('Error adding tag');
+  }
+});
+
+loadDepartmentsForCourseForm();

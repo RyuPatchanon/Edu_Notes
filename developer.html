@@ -33,6 +33,26 @@
       <h2>Deleted Reviews</h2>
       <div id="deleted-reviews" class="note-list"></div>
     </section>
+
+    <hr>
+    <h2>Add New Tag</h2>
+    <form id="tag-form">
+      <input type="text" id="new-tag" placeholder="Tag name" required />
+      <button type="submit">Add Tag</button>
+    </form>
+
+    <hr>
+    <h2>Add New Course</h2>
+    <form id="course-form">
+      <input type="text" id="course-id" placeholder="Course ID (e.g. 2110411)" required />
+      <input type="text" id="new-course" placeholder="Course name" required />
+      <select id="department-select" required>
+        <option value="">Select Department</option>
+      </select>
+      <button type="submit">Add Course</button>
+    </form>    
+
+  <hr>
   </div>
   
   <script src="scripts/config.js"></script>
