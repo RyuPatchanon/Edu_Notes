@@ -62,3 +62,24 @@ document.getElementById('review-form').addEventListener('submit', async (e) => {
 });
 
 loadNoteDetails();
+document.getElementById('delete-btn').addEventListener('click', async () => {
+    const noteId = getNoteIdFromUrl();
+
+    if (!confirm('Are you sure you want to delete this note?')) return;
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/notes/${noteId}`, {
+            method: 'DELETE'
+        });
+
+        if (res.ok) {
+            alert('Note deleted successfully.');
+            window.location.href = 'index.html'; // redirect to homepage
+        } else {
+            alert('Failed to delete note.');
+        }
+    } catch (err) {
+        console.error('Error deleting note:', err);
+        alert('An error occurred while deleting the note.');
+    }
+});

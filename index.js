@@ -377,6 +377,39 @@ app.post('/restore-review/:id', async (req, res) => {
   }
 });
 
+// Soft-delete a note
+app.delete('/notes/:id', async (req, res) => {
+  const noteId = req.params.id;
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Mark the note as deleted
+    await conn.execute(`
+      UPDATE notes
+      SET is_deleted = TRUE
+      WHERE note_id = ?
+    `, [noteId]);
+
+    // Insert into trash table
+    await conn.execute(`
+      INSERT INTO trash (note_id, deleted_at)
+      VALUES (?, NOW())
+    `, [noteId]);
+
+    await conn.commit();
+    res.status(200).send('Note deleted successfully.');
+  } catch (err) {
+    await conn.rollback();
+    console.error('Error deleting note:', err);
+    res.status(500).send('Error deleting note.');
+  } finally {
+    conn.release();
+  }
+});
+
+
 // Test endpoint
 app.get('/test', (req, res) => {
   res.status(200).json({ message: 'API is working!' });
