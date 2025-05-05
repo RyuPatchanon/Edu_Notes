@@ -13,7 +13,7 @@ const uploadFileToFirebase = require("./scripts/firebaseUpload");
 dotenv.config();
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require('./firebase/serviceAccountKey.json');
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_BUCKET,
