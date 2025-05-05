@@ -33,9 +33,34 @@ const loadReviews = async (noteId) => {
         div.innerHTML = `
             <p>${review.content}</p>
             <p><strong>Rating:</strong> ${review.rating}</p>
+            <button class="delete-review-btn" data-id="${review.review_id}">Delete Review</button>
             <hr>
         `;
         container.appendChild(div);
+    });
+
+    // Add click event listeners to delete buttons
+    document.querySelectorAll('.delete-review-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+            const reviewId = button.getAttribute('data-id');
+            if (!confirm('Are you sure you want to delete this review?')) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    alert('Review deleted successfully.');
+                    loadReviews(noteId);
+                } else {
+                    alert('Failed to delete review.');
+                }
+            } catch (err) {
+                console.error('Error deleting review:', err);
+                alert('An error occurred while deleting the review.');
+            }
+        });
     });
 };
 

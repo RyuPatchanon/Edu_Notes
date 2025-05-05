@@ -409,6 +409,38 @@ app.delete('/notes/:id', async (req, res) => {
   }
 });
 
+// Soft-delete a review
+app.delete('/reviews/:id', async (req, res) => {
+  const reviewId = req.params.id;
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Soft delete the review
+    await conn.execute(`
+      UPDATE reviews
+      SET is_deleted = TRUE
+      WHERE review_id = ?
+    `, [reviewId]);
+
+    // Add to review_trash
+    await conn.execute(`
+      INSERT INTO review_trash (review_id, deleted_at)
+      VALUES (?, NOW())
+    `, [reviewId]);
+
+    await conn.commit();
+    res.status(200).send('Review deleted successfully.');
+  } catch (err) {
+    await conn.rollback();
+    console.error('Error deleting review:', err);
+    res.status(500).send('Error deleting review.');
+  } finally {
+    conn.release();
+  }
+});
+
 
 // Test endpoint
 app.get('/test', (req, res) => {
