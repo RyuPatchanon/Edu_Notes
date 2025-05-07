@@ -1,4 +1,5 @@
-// c:\Users\Admin\Documents\GitHub\Edu_Notes\index.js
+// This is the main entry point for the Express.js application.
+// It sets up the server, connects to the database, and defines various API endpoints for handling notes, courses, tags, and reviews.
 
 // Import necessary modules
 const express = require('express'); // Express.js framework for building web applications.
