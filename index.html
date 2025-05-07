@@ -1,3 +1,5 @@
+<!-- This is the main HTML file for the Note Sharing Platform. It includes the navigation bar, filters for notes, and a container for displaying notes. The page is designed to be responsive and user-friendly. -->
+
 <!DOCTYPE html> <!-- Declares the document type to be HTML5, ensuring modern browser rendering. -->
 <html lang="en"> <!-- The root element of the HTML page, specifying the language as English for accessibility and SEO. -->
 <head> <!-- Contains meta-information about the HTML document, not displayed on the page itself. -->
@@ -17,7 +19,7 @@
         document.getElementById('navbar').innerHTML = data; // Sets the inner HTML of the 'navbar' div to the fetched navigation bar markup.
       });
   </script>
-  <!-- This div with class 'container' likely serves as a main wrapper for the page content, often styled for centering, padding, and max-width. -->
+  <!-- This div with class 'container' serves as a main wrapper for the page content. -->
   <div class="container">
     <h1>Welcome to the Note Sharing Platform</h1> <!-- The main heading for the page, providing a welcome message. -->
     <!-- This div groups the filter controls, allowing users to refine the notes displayed. -->
@@ -44,9 +46,8 @@
     <!-- This div acts as a container where the filtered and sorted notes will be dynamically displayed by app.js. -->
     <div id="notes-container"></div>
   </div>
-  <!-- JavaScript files are typically included at the end of the body for better page load performance,
-       as the browser can render the HTML structure before executing scripts. -->
-  <script src="scripts/config.js"></script> <!-- Includes the configuration script (e.g., defines API_BASE_URL). -->
+
+  <script src="scripts/config.js"></script> <!-- Includes the configuration script (defines API_BASE_URL). -->
   <script src="scripts/app.js"></script> <!-- Includes the main application JavaScript file (app.js) which handles fetching data, populating dropdowns, and displaying notes. -->
 </body>
 </html>

@@ -1,49 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Note Details</title>
-  <link rel="stylesheet" href="css/style.css">
+<!-- This HTML document represents the details of a specific note, including its title, course, tags, average rating, description, and reviews. It also allows users to edit the description and submit reviews. The page dynamically loads a navigation bar and uses JavaScript for interactivity. -->
+
+<!DOCTYPE html> <!-- Standard HTML5 document type declaration. -->
+<html lang="en"> <!-- Root HTML element, language set to English for accessibility and SEO. -->
+<head> <!-- Contains meta-information about the HTML document, not displayed on the page itself. -->
+  <meta charset="UTF-8"/> <!-- Specifies character encoding as UTF-8, essential for correct display of various characters. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- Configures the viewport for responsive web design, ensuring the page scales correctly on different devices. -->
+  <title>Note Details</title> <!-- Sets the title that appears in the browser tab or window title bar. -->
+  <link rel="stylesheet" href="css/style.css"> <!-- Links the external CSS file (style.css) to apply styling rules to this page. -->
 </head>
-<body>
-  <div id="navbar"></div>
+<body> <!-- Contains all the visible content of the HTML document. -->
+  <!-- This div acts as a placeholder where the navigation bar content will be dynamically injected by JavaScript. -->
+  <div id="navbar"></div> 
   <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('navbar').innerHTML = data;
+    // This script block fetches the content of 'navbar.html' and injects it into the 'navbar' div.
+    // This allows for a reusable navigation bar across multiple pages without server-side includes.
+    fetch('navbar.html') // Initiates an asynchronous request to fetch the 'navbar.html' file.
+      .then(res => res.text()) // When the response is received, this converts the response body to plain text.
+      .then(data => { // Once the text content of 'navbar.html' is available:
+        document.getElementById('navbar').innerHTML = data; // Sets the inner HTML of the 'navbar' div to the fetched navigation bar markup.
       });
   </script>
-
-  <div class="container">
-    <h1 id="note-title">Note Title</h1>
-    <p><strong>Course:</strong> <span id="course-name"></span></p>
-    <p><strong>Tags:</strong> <span id="tags"></span></p>
-    <p><strong>Average Rating:</strong> <span id="avg-rating"></span></p>
-    <p><strong>Description:</strong></p>
-    <p id="description"></p>
-    <textarea id="description-edit" style="display: none;"></textarea>
-    <button id="edit-description-btn">Edit Description</button>
-    <button id="save-description-btn" style="display: none;">Save</button>
-    <a id="download-link" class="btn" href="#" target="_blank">Download File</a>
-    <button id="delete-btn" class="btn btn-danger" style="margin-left: 10px;">Delete Note</button>
+  <!-- This div with class 'container' likely serves as a main wrapper for the page content, styled for centering, padding, and max-width. -->
+  <div class="container"> 
+    <h1 id="note-title">Note Title</h1> <!-- The main heading for the note, its content will be dynamically set by JavaScript (note-detail.js). -->
+    <p><strong>Course:</strong> <span id="course-name"></span></p> <!-- Paragraph to display the course name associated with the note. The span's content is set by JavaScript. -->
+    <p><strong>Tags:</strong> <span id="tags"></span></p> <!-- Paragraph to display tags associated with the note. The span's content is set by JavaScript. -->
+    <p><strong>Average Rating:</strong> <span id="avg-rating"></span></p> <!-- Paragraph to display the average rating of the note. The span's content is set by JavaScript. -->
+    <p><strong>Description:</strong></p> <!-- Static text label for the note's description. -->
+    <p id="description"></p> <!-- Paragraph where the note's description will be displayed. Content set by JavaScript. -->
+    <textarea id="description-edit" style="display: none;"></textarea> <!-- Textarea for editing the note's description. It's hidden by default and shown by JavaScript when editing. -->
+    <button id="edit-description-btn">Edit Description</button> <!-- Button to enable editing of the note's description. -->
+    <button id="save-description-btn" style="display: none;">Save</button> <!-- Button to save the edited description. Hidden by default and shown during editing. -->
+    <a id="download-link" class="btn" href="#" target="_blank">Download File</a> <!-- Link to download the file associated with the note. The 'href' attribute will be set by JavaScript. 'target="_blank"' opens the link in a new tab. -->
+    <button id="delete-btn" class="btn btn-danger" style="margin-left: 10px;">Delete Note</button> <!-- Button to delete the current note. Styled with 'btn' and 'btn-danger' classes for visual indication. -->
     
-    <hr />
+    <hr /> <!-- A horizontal rule, used as a visual separator between sections. -->
 
-    <h2>Leave a Review</h2>
-    <form id="review-form">
-      <textarea id="review-content" rows="3" placeholder="Write your review..." required></textarea>
-      <label for="review-rating">Rating (1–5)</label>
-      <input type="number" id="review-rating" min="1" max="5" required/>
-      <button type="submit">Submit Review</button>
+    <h2>Leave a Review</h2> <!-- Heading for the section where users can submit a new review. -->
+    <form id="review-form"> <!-- Form element for submitting a new review. JavaScript (note-detail.js) will handle its submission. -->
+      <textarea id="review-content" rows="3" placeholder="Write your review..." required></textarea> <!-- Textarea for users to write their review content. 'rows="3"' suggests an initial height. 'placeholder' provides a hint. 'required' makes this field mandatory. -->
+      <label for="review-rating">Rating (1–5)</label> <!-- Label associated with the rating input field for accessibility. -->
+      <input type="number" id="review-rating" min="1" max="5" required/> <!-- Number input for the review rating. 'min' and 'max' attributes constrain the value. 'required' makes this field mandatory. -->
+      <button type="submit">Submit Review</button> <!-- Button to submit the review form. -->
     </form>
 
-    <h2>Reviews</h2>
-    <div id="reviews-container"></div>
+    <h2>Reviews</h2> <!-- Heading for the section displaying existing reviews for the note. -->
+    <div id="reviews-container"></div> <!-- This div acts as a container where the list of reviews will be dynamically loaded and displayed by JavaScript (note-detail.js). -->
   </div>
   
-  <script src="scripts/config.js"></script>
-  <script src="scripts/note-detail.js"></script>
+  <script src="scripts/config.js"></script> <!-- Includes the configuration script (e.g., defines API_BASE_URL), which should be loaded before scripts that depend on it. -->
+  <script src="scripts/note-detail.js"></script> <!-- Includes the JavaScript file specific to the note detail page functionality. This script will interact with the DOM elements defined above. -->
 </body>
 </html>

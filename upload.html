@@ -1,53 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Upload Note</title>
-  <link rel="stylesheet" href="css/style.css">
+<!-- This HTML document is designed for uploading notes. It includes a form for users to input details about the note they want to upload. -->
+
+<!DOCTYPE html> <!-- Declares the document type to be HTML5, ensuring modern browser rendering. -->
+<html lang="en"> <!-- The root element of the HTML page, specifying the language as English for accessibility and SEO. -->
+<head> <!-- Contains meta-information about the HTML document, not displayed on the page itself. -->
+  <meta charset="UTF-8" /> <!-- Specifies the character encoding for the document; UTF-8 is widely recommended for international character support. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- Configures the viewport for responsive web design, making the site adapt to different device screen sizes. -->
+  <title>Upload Note</title> <!-- Sets the title that appears in the browser tab or window title bar. -->
+  <link rel="stylesheet" href="css/style.css"> <!-- Links the external CSS file (style.css) to apply styling rules to the HTML elements on this page. -->
 </head>
-<body>
+<body> <!-- Contains all the visible content of the HTML document. -->
+  <!-- This div acts as a placeholder where the navigation bar content will be dynamically injected by JavaScript. -->
   <div id="navbar"></div>
   <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('navbar').innerHTML = data;
+    // This script block fetches the content of 'navbar.html' and injects it into the 'navbar' div.
+    // This is a client-side method for reusing a common navigation bar across multiple pages.
+    fetch('navbar.html') // Initiates an asynchronous request to fetch 'navbar.html'.
+      .then(res => res.text()) // When the response is received, converts its body to plain text.
+      .then(data => { // Once the text content is available:
+        document.getElementById('navbar').innerHTML = data; // Sets the inner HTML of the 'navbar' div to the fetched navigation bar markup.
       });
   </script>
 
+  <!-- This div with class 'container' likely serves as a main wrapper for the page content, often styled for centering, padding, and max-width. -->
   <div class="container">
-    <h1>Upload a Note</h1>
+    <h1>Upload a Note</h1> <!-- The main heading for the upload page. -->
+    <!-- The form element used to collect note details and the file for upload.
+         'id="upload-note-form"' allows JavaScript to target this form.
+         'class="form"' might apply specific styling to the form.
+         'enctype="multipart/form-data"' is crucial for forms that include file uploads,
+         as it specifies how the form data should be encoded. -->
     <form id="upload-note-form" class="form" enctype="multipart/form-data">
+      <!-- Label for the title input field, improving accessibility and user experience. -->
       <label for="title">Title</label>
+      <!-- Text input field for the note's title. 'name="title"' is used to identify this field's data on submission. 'required' makes this field mandatory. -->
       <input type="text" id="title" name="title" required />
 
+      <!-- Label for the description textarea. -->
       <label for="description">Description</label>
+      <!-- Textarea for a more detailed description of the note. 'rows="4"' suggests an initial height. 'name="description"' and 'required' attribute are set. -->
       <textarea id="description" name="description" rows="4" required></textarea>
       
+      <!-- Label for the department selection dropdown. -->
       <label for="department_id">Department</label>
+      <!-- Dropdown menu (select element) for choosing the department. Options will be populated by 'upload.js'. 'name="department_id"' and 'required' attribute are set. -->
       <select id="department_id" name="department_id" required>
-        <option value="">Select Department</option>
+        <option value="">Select Department</option> <!-- Default, non-selectable placeholder option. -->
       </select>
       
+      <!-- Label for the course selection dropdown. -->
       <label for="course_id">Course</label>
+      <!-- Dropdown menu for choosing the course. Options will be populated by 'upload.js' based on the selected department. 'name="course_id"' and 'required' attribute are set. -->
       <select id="course_id" name="course_id" required>
-        <option value="">Select Course</option>
+        <option value="">Select Course</option> <!-- Default placeholder option. -->
       </select>
 
+      <!-- Label for the tag selection dropdown. -->
       <label for="tag_id">Tag</label>
+      <!-- Dropdown menu for choosing a tag. Options will be populated by 'upload.js'. 'name="tag_id"' and 'required' attribute are set. -->
       <select id="tag_id" name="tag_id" required>
-        <option value="">Select Tag</option>
+        <option value="">Select Tag</option> <!-- Default placeholder option. -->
       </select>
 
+      <!-- Label for the file input field. -->
       <label for="file">File</label>
+      <!-- Input field of type 'file' for selecting the note file to upload.
+           'name="file"' is used for submission.
+           'accept=".pdf,.docx,.pptx"' suggests to the browser to filter for these file types in the file selection dialog.
+           'required' makes file selection mandatory. -->
       <input type="file" id="file" name="file" accept=".pdf,.docx,.pptx" required />
       
+      <!-- Submit button for the form. When clicked, it triggers the form submission process, handled by 'upload.js'. -->
       <button type="submit">Upload</button>
     </form>
   </div>
   
-  <script src="scripts/config.js"></script>
+  <!-- JavaScript files are typically included at the end of the body for better page load performance. -->
+  <script src="scripts/config.js"></script> <!-- Includes the configuration script (e.g., defines API_BASE_URL). -->
+  <!-- Includes the JavaScript file specific to the upload page functionality.
+       The 'defer' attribute ensures the script is executed after the HTML document has been parsed,
+       but before the DOMContentLoaded event. It also ensures scripts execute in order. -->
   <script src="scripts/upload.js" defer></script>
 </body>
 </html>
