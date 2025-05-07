@@ -77,8 +77,7 @@ const loadReviews = async (noteId) => {
                     <input type="number" class="edit-review-rating" min="1" max="5" value="${review.rating}" style="display:none;" />
                     <button class="edit-review-btn">Edit</button>
                     <button class="save-review-btn" style="display:none;">Save</button>
-                    <!-- Consider adding a delete button here if it's per review: -->
-                    <!-- <button class="delete-review-btn" data-review-id="${review.review_id}">Delete</button> -->
+                    <button class="delete-review-btn" data-review-id="${review.review_id}">Delete</button>
                     <hr>
                 `;
         
