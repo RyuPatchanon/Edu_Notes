@@ -1,41 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-  <link rel="stylesheet" href="css/style.css">
+<!DOCTYPE html> <!-- Declares the document type to be HTML5, ensuring modern browser rendering. -->
+<html lang="en"> <!-- The root element of the HTML page, specifying the language as English for accessibility and SEO. -->
+<head> <!-- Contains meta-information about the HTML document, not displayed on the page itself. -->
+  <meta charset="UTF-8"> <!-- Specifies the character encoding for the document; UTF-8 is widely recommended for international character support. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configures the viewport for responsive web design, making the site adapt to different device screen sizes. 'width=device-width' sets the width of the viewport to the device width, and 'initial-scale=1.0' sets the initial zoom level. -->
+  <title>Home</title> <!-- Sets the title that appears in the browser tab or window title bar, and is also used by search engines. -->
+  <link rel="stylesheet" href="css/style.css"> <!-- Links the external CSS file (style.css) to apply styling rules to the HTML elements on this page. -->
 </head>
-<body>
+<body> <!-- Contains all the visible content of the HTML document. -->
+  <!-- This div acts as a placeholder where the navigation bar content will be dynamically injected by JavaScript. -->
   <div id="navbar"></div>
   <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('navbar').innerHTML = data;
+    // This script block fetches the content of 'navbar.html' and injects it into the 'navbar' div.
+    fetch('navbar.html') // Initiates an asynchronous request to fetch the 'navbar.html' file.
+      .then(res => res.text()) // When the response is received, this converts the response body to plain text.
+      .then(data => { // Once the text content of 'navbar.html' is available:
+        document.getElementById('navbar').innerHTML = data; // Sets the inner HTML of the 'navbar' div to the fetched navigation bar markup.
       });
   </script>
+  <!-- This div with class 'container' likely serves as a main wrapper for the page content, often styled for centering, padding, and max-width. -->
   <div class="container">
-    <h1>Welcome to the Note Sharing Platform</h1>
+    <h1>Welcome to the Note Sharing Platform</h1> <!-- The main heading for the page, providing a welcome message. -->
+    <!-- This div groups the filter controls, allowing users to refine the notes displayed. -->
     <div class="filters">
+      <!-- Dropdown menu for selecting a department. Options will be populated by app.js. -->
       <select id="department-dropdown">
-        <option value="">Select Department</option>
+        <option value="">Select Department</option> <!-- Default, non-selectable placeholder option. -->
       </select>
+      <!-- Dropdown menu for selecting a course. Options will be populated by app.js based on the selected department. -->
       <select id="course-dropdown">
-        <option value="">Select Course</option>
+        <option value="">Select Course</option> <!-- Default placeholder option. -->
       </select>
+      <!-- Dropdown menu for selecting a tag. Options will be populated by app.js. -->
       <select id="tag-dropdown">
-        <option value="">Select Tag</option>
+        <option value="">Select Tag</option> <!-- Default placeholder option. -->
       </select>
+      <!-- Dropdown menu for selecting the sorting criteria for the notes. -->
       <select id="sort-dropdown">
-        <option value="">Sort By</option>
-        <option value="date">Date</option>
-        <option value="rating">Rating</option>
+        <option value="">Sort By</option> <!-- Default placeholder option. -->
+        <option value="date">Date</option> <!-- Option to sort notes by date. -->
+        <option value="rating">Rating</option> <!-- Option to sort notes by rating. -->
       </select>
     </div>
+    <!-- This div acts as a container where the filtered and sorted notes will be dynamically displayed by app.js. -->
     <div id="notes-container"></div>
   </div>
-  <script src="scripts/config.js"></script>
-  <script src="scripts/app.js"></script>
+  <!-- JavaScript files are typically included at the end of the body for better page load performance,
+       as the browser can render the HTML structure before executing scripts. -->
+  <script src="scripts/config.js"></script> <!-- Includes the configuration script (e.g., defines API_BASE_URL). -->
+  <script src="scripts/app.js"></script> <!-- Includes the main application JavaScript file (app.js) which handles fetching data, populating dropdowns, and displaying notes. -->
 </body>
 </html>

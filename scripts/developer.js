@@ -1,4 +1,4 @@
-// This script is responsible for managing the developer dashboard functionalities.
+// developer.js is responsible for managing the developer dashboard functionalities.
 
 // This event listener ensures that the DOM is fully loaded and parsed before executing the functions to populate the dashboard.
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,9 +21,7 @@ function loadStats() {
         console.error('Error: Stats container not found.');
         return;
       }
-      // Uses a template literal to construct the HTML for displaying statistics.
-      // Consider creating DOM elements programmatically for complex structures or if data needs sanitization,
-      // though for trusted API data and simple display, innerHTML is often acceptable.
+
       container.innerHTML = `
         <p><strong>Total Notes:</strong> ${data.total_notes}</p>
         <p><strong>Total Files:</strong> ${data.total_files}</p>
@@ -61,10 +59,8 @@ function loadDeletedNotes() {
         container.innerHTML = '<p>No deleted notes.</p>'; // Displays a message if no notes are found.
         return;
       }
-
+      
       // Maps over the array of deleted notes to create HTML for each one.
-      // The onclick attribute directly calls a global function. For more complex applications,
-      // consider adding event listeners programmatically after creating the elements.
       container.innerHTML = notes.map(note => `
         <div class="note-card">
           <h3>${note.title}</h3>
@@ -260,6 +256,3 @@ document.getElementById('tag-form').addEventListener('submit', async (e) => {
     alert('An error occurred while adding the tag.');
   }
 });
-
-// Note: The call to loadDepartmentsForCourseForm() was moved to the DOMContentLoaded listener
-// to ensure it runs after the DOM is ready and to group initialization logic.
