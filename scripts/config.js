@@ -1,1 +1,1 @@
-const API_BASE_URL = 'https://edu-notes.onrender.com';
+const API_BASE_URL = 'https://edu-notes.onrender.com'; // Base URL for the API

@@ -1,61 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Developer Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+<!-- This is the HTML document for the Developer Dashboard page. It includes sections for statistics, deleted notes, and a form to add new tags and courses. The page uses JavaScript to dynamically load content and handle form submissions. -->
+ 
+<!DOCTYPE html> <!-- Declares the document type to be HTML5. -->
+<html lang="en"> <!-- The root element of the HTML page, specifying the language as English. -->
+<head> <!-- Contains meta-information about the HTML document, not displayed on the page itself. -->
+  <meta charset="UTF-8" /> <!-- Specifies the character encoding for the document, UTF-8 is recommended for broad compatibility. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- Configures the viewport for responsive web design, making the site adapt to different device widths. -->
+  <title>Developer Dashboard</title> <!-- Sets the title that appears in the browser tab or window title bar. -->
+  <link rel="stylesheet" href="css/style.css"> <!-- Links the external CSS file (style.css) to style the HTML elements. -->
 </head>
-<body>
+<body> <!-- Contains the visible page content. -->
+
+  <!-- This div will be populated with the navigation bar content. -->
   <div id="navbar"></div>
   <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('navbar').innerHTML = data;
+    // This script block fetches and injects the content of 'navbar.html' into the 'navbar' div.
+    // It's a common way to reuse a navigation bar across multiple pages without server-side includes.
+    fetch('navbar.html') // Initiates a request to fetch the 'navbar.html' file.
+      .then(res => res.text()) // When the response is received, convert it to plain text.
+      .then(data => { // Once the text content is available:
+        document.getElementById('navbar').innerHTML = data; // Set the inner HTML of the 'navbar' div to the fetched content.
       });
   </script>
 
+  <!-- Main container for the page content, likely styled for centering and max-width. -->
   <div class="container">
-    <h1>Developer Dashboard</h1>
+    <h1>Developer Dashboard</h1> <!-- Main heading for the page. -->
 
+    <!-- Section to display various statistics. -->
     <section>
-      <h2>Statistics</h2>
-      <div id="stats"></div>
+      <h2>Statistics</h2> <!-- Heading for the statistics section. -->
+      <div id="stats"></div> <!-- Placeholder div where statistics data will be dynamically loaded by JavaScript. -->
     </section>
 
+    <!-- Section to display a list of deleted notes. -->
     <section>
-      <h2>Deleted Notes</h2>
-      <div id="deleted-notes" class="note-list"></div>
+      <h2>Deleted Notes</h2> <!-- Heading for the deleted notes section. -->
+      <div id="deleted-notes" class="note-list"></div> <!-- Placeholder div for deleted notes, styled with 'note-list'. JavaScript will populate this. -->
     </section>
 
+    <!-- Section to display a list of deleted reviews. -->
     <section>
-      <h2>Deleted Reviews</h2>
-      <div id="deleted-reviews" class="note-list"></div>
+      <h2>Deleted Reviews</h2> <!-- Heading for the deleted reviews section. -->
+      <div id="deleted-reviews" class="note-list"></div> <!-- Placeholder div for deleted reviews, styled with 'note-list'. JavaScript will populate this. -->
     </section>
 
-    <hr>
+    <hr> <!-- A horizontal rule, used as a visual separator. -->
+
+    <!-- Section for adding a new tag. -->
     <h2>Add New Tag</h2>
-    <form id="tag-form">
-      <input type="text" id="new-tag" placeholder="Tag name" required />
-      <button type="submit">Add Tag</button>
+    <form id="tag-form"> <!-- Form element for submitting new tag data. -->
+      <input type="text" id="new-tag" placeholder="Tag name" required /> <!-- Text input field for the new tag name. 'required' makes it mandatory. -->
+      <button type="submit">Add Tag</button> <!-- Submit button for the tag form. -->
     </form>
 
-    <hr>
+    <hr> <!-- Another horizontal rule for separation. -->
+
+    <!-- Section for adding a new course. -->
     <h2>Add New Course</h2>
-    <form id="course-form">
-      <input type="text" id="course-id" placeholder="Course ID (e.g. 2110411)" required />
-      <input type="text" id="new-course" placeholder="Course name" required />
-      <select id="department-select" required>
-        <option value="">Select Department</option>
+    <form id="course-form"> <!-- Form element for submitting new course data. -->
+      <input type="text" id="course-id" placeholder="Course ID (e.g. 2110411)" required /> <!-- Text input for the course ID. -->
+      <input type="text" id="new-course" placeholder="Course name" required /> <!-- Text input for the new course name. -->
+      <select id="department-select" required> <!-- Dropdown menu for selecting the department for the new course. -->
+        <option value="">Select Department</option> <!-- Default, non-selectable option. -->
+        <!-- Department options will be populated by JavaScript (likely from developer.js). -->
       </select>
-      <button type="submit">Add Course</button>
+      <button type="submit">Add Course</button> <!-- Submit button for the course form. -->
     </form>    
 
-  <hr>
+  <hr> <!-- Final horizontal rule. -->
   </div>
   
-  <script src="scripts/config.js"></script>
-  <script src="scripts/developer.js"></script>
+  <!-- JavaScript files are typically included at the end of the body for better page load performance. -->
+  <script src="scripts/config.js"></script> <!-- Includes the configuration script (likely defines API_BASE_URL). -->
+  <script src="scripts/developer.js"></script> <!-- Includes the JavaScript file specific to the developer dashboard functionality. -->
 </body>
 </html>
