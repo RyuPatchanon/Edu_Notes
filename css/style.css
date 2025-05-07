@@ -1,4 +1,5 @@
-body {
+/* c:\Users\Admin\Documents\GitHub\Edu_Notes\css\style.css */
+body { /* Sets default styles for the entire page, including font, margins, background, and text color. */
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -6,7 +7,7 @@ body {
   color: #333;
 }
 
-nav {
+nav { /* Styles the main navigation bar with a dark background, centered flex layout, and spacing between items. */
   background-color: #2c3e50;
   padding: 1rem;
   display: flex;
@@ -14,28 +15,28 @@ nav {
   gap: 2rem;
 }
 
-nav a {
+nav a { /* Styles links within the main navigation bar: white text, no underline, and bold font. */
   color: white;
   text-decoration: none;
   font-weight: bold;
 }
 
-nav a:hover {
+nav a:hover { /* Adds an underline to main navigation links on mouse hover. */
   text-decoration: underline;
 }
 
-.container {
+.container { /* Defines a centered content container with a maximum width and horizontal padding. */
   max-width: 900px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
 
-h1, h2 {
+h1, h2 { /* Styles H1 and H2 headings with a specific color and bottom margin. */
   color: #2c3e50;
   margin-bottom: 1rem;
 }
 
-section {
+section { /* Styles section elements with a white background, padding, rounded corners, and a subtle shadow. */
   margin-bottom: 2.5rem;
   background-color: #fff;
   padding: 1.5rem;
@@ -43,7 +44,7 @@ section {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.note-card {
+.note-card { /* Styles individual "note card" elements with a light background, padding, rounded corners, and a shadow. */
   background-color: #f0f4f8;
   padding: 1rem;
   border-radius: 8px;
@@ -51,16 +52,16 @@ section {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.note-card h3 {
+.note-card h3 { /* Styles H3 headings within note cards, removing top margin and setting text color. */
   margin-top: 0;
   color: #34495e;
 }
 
-.note-card p {
+.note-card p { /* Styles paragraphs within note cards with minimal vertical margin. */
   margin: 0.25rem 0;
 }
 
-button {
+button { /* Styles button elements with a blue background, white text, no border, padding, rounded corners, and a pointer cursor. */
   background-color: #3498db;
   color: white;
   border: none;
@@ -71,18 +72,19 @@ button {
   margin-top: 0.5rem;
 }
 
-button:hover {
+button:hover { /* Darkens the background color of buttons on mouse hover. */
   background-color: #2980b9;
 }
 
-ul {
+ul { /* Adds left padding to unordered lists for bullet points. */
   padding-left: 1.25rem;
 }
 
-ul li {
+ul li { /* Adds a small bottom margin to list items in unordered lists. */
   margin-bottom: 0.25rem;
 }
-.navbar {
+
+.navbar { /* Styles an alternative navigation bar with a white background, flex layout for item distribution, and a bottom border. */
   background-color: #fff;
   padding: 1rem 2rem;
   display: flex;
@@ -91,33 +93,33 @@ ul li {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.nav-container {
+.nav-container { /* Defines a full-width flex container within the .navbar to manage layout of its children. */
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 }
 
-.nav-logo {
+.nav-logo { /* Styles the navigation logo with a specific font size, weight, and color, removing text decoration. */
   font-size: 1.5rem;
   font-weight: bold;
   text-decoration: none;
   color: #2c3e50;
 }
 
-.nav-links {
+.nav-links { /* Styles the list of navigation links, removing list bullets and arranging items in a row with spacing. */
   list-style: none;
   display: flex;
   gap: 1.5rem;
 }
 
-.nav-links li a {
+.nav-links li a { /* Styles individual links within the .nav-links list: no underline, specific color, font weight, and a color transition. */
   text-decoration: none;
   color: #2c3e50;
   font-weight: 500;
   transition: color 0.2s;
 }
 
-.nav-links li a:hover {
+.nav-links li a:hover { /* Changes the text color of .nav-links items on mouse hover. */
   color: #3498db;
 }
