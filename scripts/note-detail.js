@@ -147,8 +147,8 @@ const loadReviews = async (noteId) => {
         // Event listener for the delete review buttons.
         document.querySelectorAll('.delete-review-btn').forEach(button => {
             button.addEventListener('click', async () => {
-                // The 'data-id' attribute should ideally be 'data-review-id' for clarity if it's on the button itself.
-                const reviewIdToDelete = button.getAttribute('data-id') || button.closest('.review')?.dataset.reviewId; // Example of getting ID
+                // Retrieve the review ID directly from the button's data-review-id attribute.
+                const reviewIdToDelete = button.dataset.reviewId; 
                 if (!reviewIdToDelete) {
                     console.error("Could not find review ID for deletion.");
                     alert("Error: Could not identify review to delete.");
