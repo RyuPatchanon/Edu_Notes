@@ -68,6 +68,7 @@ const loadReviews = async (noteId) => {
         } else {
             reviews.forEach(review => {
                 const div = document.createElement('div'); // Creates a new <div> for each review.
+                console.log(`Processing review for display: ID = ${review.review_id}, Type = ${typeof review.review_id}`, review); // DEBUG: Log review object and ID
                 div.classList.add('review'); // Adds a CSS class for styling.
                 // Sets the inner HTML for the review, including display elements and hidden edit fields.
                 div.innerHTML = `
@@ -81,6 +82,12 @@ const loadReviews = async (noteId) => {
                     <hr>
                 `;
         
+                const currentDeleteBtn = div.querySelector('.delete-review-btn');
+                if (currentDeleteBtn) {
+                    console.log('Rendered delete button HTML for this review:', currentDeleteBtn.outerHTML); // DEBUG: Log the button's HTML
+                    console.log('Attribute data-review-id on rendered button:', currentDeleteBtn.getAttribute('data-review-id')); // DEBUG: Log the attribute value directly
+                }
+
                 container.appendChild(div); // Appends the new review div to the container.
         
                 // Selects elements within the newly created review div for event handling.
@@ -147,10 +154,14 @@ const loadReviews = async (noteId) => {
         // Event listener for the delete review buttons.
         document.querySelectorAll('.delete-review-btn').forEach(button => {
             button.addEventListener('click', async () => {
+                console.log('Delete button clicked. Full button element:', button); // DEBUG: Log the button element
+                console.log('Button dataset property:', button.dataset); // DEBUG: Log all data attributes
                 // Retrieve the review ID directly from the button's data-review-id attribute.
                 const reviewIdToDelete = button.dataset.reviewId; 
+                console.log(`Value of button.dataset.reviewId: "${reviewIdToDelete}" (type: ${typeof reviewIdToDelete})`); // DEBUG: Log retrieved ID and its type
+
                 if (!reviewIdToDelete) {
-                    console.error("Could not find review ID for deletion.");
+                    console.error("Could not find review ID for deletion. `button.dataset.reviewId` was falsy. Button HTML:", button.outerHTML); // DEBUG: More detailed error
                     alert("Error: Could not identify review to delete.");
                     return;
                 }
